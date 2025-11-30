@@ -4,5 +4,5 @@
 
 ## 演示效果
 
-https://github.com/amoyalang/muyu/raw/main/video/demo.webm
+![演示视频](vedio/demo.gif)
 
