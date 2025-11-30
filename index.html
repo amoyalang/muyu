@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>功德木鱼</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #1a1510;
+            --bg-gradient: radial-gradient(ellipse at center, #2d2520 0%, #1a1510 70%);
+            --gold: #d4a84b;
+            --gold-light: #f0d78c;
+            --gold-dark: #8b6914;
+            --wood: #8b5a2b;
+            --wood-light: #a0522d;
+            --text-light: #f5e6d3;
+            --glow: rgba(212, 168, 75, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg-gradient);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Noto Serif SC', serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 背景装饰 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(212, 168, 75, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(212, 168, 75, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        /* 顶部标题 */
+        .title {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 3rem;
+            color: var(--gold);
+            text-shadow: 0 0 20px var(--glow), 0 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 1rem;
+            letter-spacing: 0.5rem;
+        }
+
+        /* 功德计数器 */
+        .merit-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .merit-label {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+
+        .merit-count {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 4rem;
+            color: var(--gold-light);
+            text-shadow: 0 0 30px var(--glow);
+            transition: transform 0.1s ease;
+        }
+
+        .merit-count.pulse {
+            transform: scale(1.1);
+        }
+
+        /* 木鱼容器 */
+        .muyu-container {
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 木鱼主体 */
+        .muyu {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            transition: transform 0.1s ease;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5));
+        }
+
+        .muyu:active,
+        .muyu.hit {
+            transform: scale(0.92);
+        }
+
+        /* 木鱼 SVG */
+        .muyu-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 光环效果 */
+        .glow-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .glow-ring.animate {
+            animation: ringExpand 0.6s ease-out forwards;
+        }
+
+        @keyframes ringExpand {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        /* 功德+1 飘字 */
+        .merit-popup {
+            position: absolute;
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 2rem;
+            color: var(--gold-light);
+            text-shadow: 0 0 10px var(--glow), 0 2px 4px rgba(0,0,0,0.5);
+            pointer-events: none;
+            white-space: nowrap;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 100;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: translateY(-40px) scale(1.2);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-80px) scale(0.8);
+            }
+        }
+
+        /* 底部提示 */
+        .hint {
+            position: absolute;
+            bottom: 2rem;
+            color: var(--text-light);
+            opacity: 0.5;
+            font-size: 0.9rem;
+            letter-spacing: 0.2rem;
+        }
+
+        /* 清空按钮 */
+        .reset-btn {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: transparent;
+            border: 1px solid var(--gold-dark);
+            color: var(--gold-dark);
+            padding: 0.5rem 1rem;
+            font-family: 'Noto Serif SC', serif;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: all 0.2s ease;
+        }
+
+        .reset-btn:hover {
+            opacity: 1;
+            border-color: var(--gold);
+            color: var(--gold);
+            box-shadow: 0 0 10px var(--glow);
+        }
+
+        .reset-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 粒子效果容器 */
+        .particles {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--gold);
+            border-radius: 50%;
+            animation: particleFly 0.8s ease-out forwards;
+        }
+
+        @keyframes particleFly {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(0);
+            }
+        }
+
+        /* 响应式 */
+        @media (max-width: 480px) {
+            .title {
+                font-size: 2rem;
+            }
+            .merit-count {
+                font-size: 3rem;
+            }
+            .muyu {
+                width: 160px;
+                height: 160px;
+            }
+            .glow-ring {
+                width: 180px;
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title">功德木鱼</h1>
+    
+    <div class="merit-container">
+        <div class="merit-label">已积累功德</div>
+        <div class="merit-count" id="meritCount">0</div>
+    </div>
+
+    <div class="muyu-container" id="muyuContainer">
+        <div class="glow-ring" id="glowRing"></div>
+        <div class="muyu" id="muyu">
+            <svg class="muyu-svg" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <!-- 木纹渐变 -->
+                    <linearGradient id="woodGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#b8860b"/>
+                        <stop offset="30%" style="stop-color:#8b4513"/>
+                        <stop offset="70%" style="stop-color:#654321"/>
+                        <stop offset="100%" style="stop-color:#4a3520"/>
+                    </linearGradient>
+                    <linearGradient id="woodTop" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#daa520"/>
+                        <stop offset="50%" style="stop-color:#b8860b"/>
+                        <stop offset="100%" style="stop-color:#8b4513"/>
+                    </linearGradient>
+                    <linearGradient id="handleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#654321"/>
+                        <stop offset="50%" style="stop-color:#8b4513"/>
+                        <stop offset="100%" style="stop-color:#654321"/>
+                    </linearGradient>
+                    <radialGradient id="innerGlow" cx="50%" cy="30%" r="60%">
+                        <stop offset="0%" style="stop-color:#cd853f"/>
+                        <stop offset="100%" style="stop-color:#8b4513"/>
+                    </radialGradient>
+                    <!-- 阴影滤镜 -->
+                    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.4"/>
+                    </filter>
+                </defs>
+                
+                <!-- 手柄/提环 -->
+                <ellipse cx="100" cy="35" rx="25" ry="18" fill="none" stroke="url(#handleGradient)" stroke-width="8"/>
+                <ellipse cx="100" cy="35" rx="25" ry="18" fill="none" stroke="#a0522d" stroke-width="4"/>
+                
+                <!-- 顶部装饰莲花座 -->
+                <ellipse cx="100" cy="55" rx="18" ry="8" fill="#8b4513"/>
+                <path d="M 82 55 Q 100 45 118 55" fill="#a0522d" stroke="#654321" stroke-width="1"/>
+                
+                <!-- 木鱼主体 - 圆润的馒头形 -->
+                <ellipse cx="100" cy="130" rx="75" ry="60" fill="url(#woodGradient)" filter="url(#dropShadow)"/>
+                
+                <!-- 上半部高光 -->
+                <ellipse cx="100" cy="110" rx="70" ry="45" fill="url(#innerGlow)"/>
+                
+                <!-- 木纹装饰线条 -->
+                <path d="M 35 120 Q 100 90 165 120" stroke="#654321" stroke-width="1.5" fill="none" opacity="0.4"/>
+                <path d="M 40 135 Q 100 105 160 135" stroke="#654321" stroke-width="1.5" fill="none" opacity="0.3"/>
+                <path d="M 45 150 Q 100 125 155 150" stroke="#654321" stroke-width="1.5" fill="none" opacity="0.2"/>
+                
+                <!-- 中间开口槽 -->
+                <ellipse cx="100" cy="145" rx="35" ry="12" fill="#2d1810"/>
+                <ellipse cx="100" cy="143" rx="30" ry="8" fill="#1a100a"/>
+                <!-- 开口内部阴影 -->
+                <ellipse cx="100" cy="141" rx="25" ry="5" fill="#0d0805"/>
+                
+                <!-- 雕刻花纹 - 左侧 -->
+                <path d="M 45 115 Q 55 110 50 100" stroke="#654321" stroke-width="2" fill="none" opacity="0.5"/>
+                <path d="M 50 125 Q 60 118 55 108" stroke="#654321" stroke-width="2" fill="none" opacity="0.4"/>
+                <circle cx="52" cy="112" r="3" fill="#654321" opacity="0.3"/>
+                
+                <!-- 雕刻花纹 - 右侧 -->
+                <path d="M 155 115 Q 145 110 150 100" stroke="#654321" stroke-width="2" fill="none" opacity="0.5"/>
+                <path d="M 150 125 Q 140 118 145 108" stroke="#654321" stroke-width="2" fill="none" opacity="0.4"/>
+                <circle cx="148" cy="112" r="3" fill="#654321" opacity="0.3"/>
+                
+                <!-- 高光反射 -->
+                <ellipse cx="75" cy="100" rx="25" ry="12" fill="rgba(255,255,255,0.12)" transform="rotate(-15 75 100)"/>
+                <ellipse cx="130" cy="105" rx="15" ry="8" fill="rgba(255,255,255,0.08)" transform="rotate(15 130 105)"/>
+                
+                <!-- 底部阴影 -->
+                <ellipse cx="100" cy="185" rx="60" ry="10" fill="rgba(0,0,0,0.2)"/>
+            </svg>
+        </div>
+        <div class="particles" id="particles"></div>
+    </div>
+
+    <p class="hint">点击木鱼积累功德</p>
+
+    <button class="reset-btn" id="resetBtn">清空功德</button>
+
+    <script>
+        // 音频上下文
+        let audioContext = null;
+
+        // 初始化音频上下文
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // 播放木鱼敲击音效 - 清脆的"笃"声
+        function playWoodSound() {
+            initAudio();
+            
+            const now = audioContext.currentTime;
+            
+            // 主音 - 木鱼的基础"笃"声
+            const mainOsc = audioContext.createOscillator();
+            const mainGain = audioContext.createGain();
+            const mainFilter = audioContext.createBiquadFilter();
+            
+            mainOsc.type = 'sine';
+            mainOsc.frequency.setValueAtTime(420, now);
+            mainOsc.frequency.exponentialRampToValueAtTime(280, now + 0.08);
+            
+            mainFilter.type = 'bandpass';
+            mainFilter.frequency.setValueAtTime(600, now);
+            mainFilter.Q.setValueAtTime(2, now);
+            
+            mainGain.gain.setValueAtTime(0.6, now);
+            mainGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+            
+            mainOsc.connect(mainFilter);
+            mainFilter.connect(mainGain);
+            mainGain.connect(audioContext.destination);
+            
+            mainOsc.start(now);
+            mainOsc.stop(now + 0.25);
+            
+            // 敲击瞬态 - 清脆的起音
+            const attackOsc = audioContext.createOscillator();
+            const attackGain = audioContext.createGain();
+            const attackFilter = audioContext.createBiquadFilter();
+            
+            attackOsc.type = 'square';
+            attackOsc.frequency.setValueAtTime(1800, now);
+            attackOsc.frequency.exponentialRampToValueAtTime(400, now + 0.015);
+            
+            attackFilter.type = 'highpass';
+            attackFilter.frequency.setValueAtTime(500, now);
+            
+            attackGain.gain.setValueAtTime(0.3, now);
+            attackGain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+            
+            attackOsc.connect(attackFilter);
+            attackFilter.connect(attackGain);
+            attackGain.connect(audioContext.destination);
+            
+            attackOsc.start(now);
+            attackOsc.stop(now + 0.04);
+            
+            // 共鸣泛音 - 空心木质共振
+            const resonanceOsc = audioContext.createOscillator();
+            const resonanceGain = audioContext.createGain();
+            const resonanceFilter = audioContext.createBiquadFilter();
+            
+            resonanceOsc.type = 'triangle';
+            resonanceOsc.frequency.setValueAtTime(680, now);
+            resonanceOsc.frequency.exponentialRampToValueAtTime(520, now + 0.1);
+            
+            resonanceFilter.type = 'bandpass';
+            resonanceFilter.frequency.setValueAtTime(700, now);
+            resonanceFilter.Q.setValueAtTime(8, now);
+            
+            resonanceGain.gain.setValueAtTime(0.15, now + 0.01);
+            resonanceGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            
+            resonanceOsc.connect(resonanceFilter);
+            resonanceFilter.connect(resonanceGain);
+            resonanceGain.connect(audioContext.destination);
+            
+            resonanceOsc.start(now);
+            resonanceOsc.stop(now + 0.35);
+            
+            // 低频共鸣 - 木质厚重感
+            const bodyOsc = audioContext.createOscillator();
+            const bodyGain = audioContext.createGain();
+            const bodyFilter = audioContext.createBiquadFilter();
+            
+            bodyOsc.type = 'sine';
+            bodyOsc.frequency.setValueAtTime(180, now);
+            bodyOsc.frequency.exponentialRampToValueAtTime(120, now + 0.15);
+            
+            bodyFilter.type = 'lowpass';
+            bodyFilter.frequency.setValueAtTime(300, now);
+            
+            bodyGain.gain.setValueAtTime(0.25, now);
+            bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+            
+            bodyOsc.connect(bodyFilter);
+            bodyFilter.connect(bodyGain);
+            bodyGain.connect(audioContext.destination);
+            
+            bodyOsc.start(now);
+            bodyOsc.stop(now + 0.2);
+        }
+
+        // 功德计数
+        let meritCount = 0;
+        const meritCountEl = document.getElementById('meritCount');
+        const muyuContainer = document.getElementById('muyuContainer');
+        const muyu = document.getElementById('muyu');
+        const glowRing = document.getElementById('glowRing');
+        const particles = document.getElementById('particles');
+
+        // 创建功德+1飘字
+        function createMeritPopup() {
+            const popup = document.createElement('div');
+            popup.className = 'merit-popup';
+            popup.textContent = '功德 +1';
+            
+            // 随机位置偏移
+            const offsetX = (Math.random() - 0.5) * 60;
+            popup.style.left = `calc(50% + ${offsetX}px)`;
+            popup.style.top = '20%';
+            
+            muyuContainer.appendChild(popup);
+            
+            // 动画结束后移除
+            setTimeout(() => popup.remove(), 1000);
+        }
+
+        // 创建粒子效果
+        function createParticles() {
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // 随机方向
+                const angle = (i / 8) * Math.PI * 2;
+                const distance = 50 + Math.random() * 30;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                particle.style.setProperty('--tx', `${tx}px`);
+                particle.style.setProperty('--ty', `${ty}px`);
+                
+                particles.appendChild(particle);
+                
+                setTimeout(() => particle.remove(), 800);
+            }
+        }
+
+        // 敲击木鱼
+        function hitMuyu() {
+            // 播放音效
+            playWoodSound();
+            
+            // 增加功德
+            meritCount++;
+            meritCountEl.textContent = meritCount;
+            
+            // 计数器动画
+            meritCountEl.classList.add('pulse');
+            setTimeout(() => meritCountEl.classList.remove('pulse'), 100);
+            
+            // 木鱼敲击动画
+            muyu.classList.add('hit');
+            setTimeout(() => muyu.classList.remove('hit'), 100);
+            
+            // 光环动画
+            glowRing.classList.remove('animate');
+            void glowRing.offsetWidth; // 触发重排以重置动画
+            glowRing.classList.add('animate');
+            
+            // 功德+1飘字
+            createMeritPopup();
+            
+            // 粒子效果
+            createParticles();
+        }
+
+        // 绑定点击事件
+        muyuContainer.addEventListener('click', hitMuyu);
+
+        // 支持键盘空格键
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                hitMuyu();
+            }
+        });
+
+        // 清空功德
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (confirm('确定要清空所有功德吗？')) {
+                meritCount = 0;
+                meritCountEl.textContent = '0';
+                localStorage.removeItem('muyuMerit');
+            }
+        });
+
+        // 从本地存储恢复功德
+        const savedMerit = localStorage.getItem('muyuMerit');
+        if (savedMerit) {
+            meritCount = parseInt(savedMerit);
+            meritCountEl.textContent = meritCount;
+        }
+
+        // 保存功德到本地存储
+        setInterval(() => {
+            localStorage.setItem('muyuMerit', meritCount.toString());
+        }, 1000);
+    </script>
+</body>
+</html>
+
