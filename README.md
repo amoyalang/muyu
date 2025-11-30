@@ -4,5 +4,7 @@
 
 ## 演示效果
 
-![演示视频](vedio/demo.gif)
+![演示视频](video/demo.gif)
+
+
 
